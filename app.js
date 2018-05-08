@@ -51,6 +51,16 @@ const proxyBuilder = (options) => {
     if (!options.ws) options.ws = false;
 
     if (!options.pathRewrite) options.pathRewrite = (path, req) => {
+        var multiparty = require('multiparty');
+
+        var form = new multiparty.Form({
+           encoding : "utf8",
+           maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
+           autoFields : true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
+           autoFiles: false          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
+//            uploadDir
+        });
+
          var purl = '/error';
 
          if (isProxyRegEx.test(path) ) {
@@ -62,18 +72,6 @@ const proxyBuilder = (options) => {
              console.log("undeclared form")
 //             purl = parseFormTOBuild(path, req);
 
-
-        var multiparty = require('multiparty');
-
-        var formOpts = {
-            encoding : "utf8",
-            maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
-            autoFields : true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
-            autoFiles: true          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
-//            uploadDir
-        };
-
-        var form = new multiparty.Form(formOpts);
 
         var uplargs = {
             bucketId: '',
@@ -89,18 +87,15 @@ const proxyBuilder = (options) => {
                 console.log('got field value: ' + fields[name][0]);
             });
 
-            Object.keys(files).forEach(function(fileFieldKey) {
-                var file = files[fileFieldKey][0];
-
-//                uplargs.destDir = fileFieldKey;
-
-                console.log('got file fileFieldKey ' + fileFieldKey);
-                console.log('got file fileFieldName ' + file.fieldName);
-                console.log('got file originalFilename ' + file.originalFilename);
-                console.log('got file path ' + file.path);
-                console.log('got file file.headers ' + JSON.stringify(file.headers));
-                console.log('got file file.size ' + file.size);
-            });
+//            Object.keys(files).forEach(function(fileFieldKey) {
+//                var file = files[fileFieldKey][0];
+//                console.log('got file fileFieldKey ' + fileFieldKey);
+//                console.log('got file fileFieldName ' + file.fieldName);
+//                console.log('got file originalFilename ' + file.originalFilename);
+//                console.log('got file path ' + file.path);
+//                console.log('got file file.headers ' + JSON.stringify(file.headers));
+//                console.log('got file file.size ' + file.size);
+//            });
 //   Uri: /upload//editor%40org.com/imgs/brand
 
             console.log('Upload completed!');
