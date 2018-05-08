@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  h1= title
+
+  form#uploadForm(method='POST' encType='multipart/form-data' ref="uploadForm")
+      select(name='bucketId')
+        each bucket in buckets
+          option(value=bucket.bucketId) #{bucket.bucketName}
+
+      input(type='text' name='destDir' value=`${destDir}`)
+      input(type='text' name='author' value="author")
+      input(type='file' name='imgs/brand')
+      input(type='submit' name='submit' value='upload')
