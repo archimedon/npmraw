@@ -6,10 +6,10 @@
   "license": "ISC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel ./src --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files && cp -r src/views dist/ && cp -r src/public dist/",
+    "build": "rimraf dist/ && babel ./src --out-dir dist/ --ignore ./node_modules,./.babelrc,./npm-debug.log --copy-files ",
     "prestart-dev": "npm run build",
-    "start-dev": "nodemon --delay 2 --watch src -e js dist/app.js",
-    "start": "nodemon --delay 1 --watch src -e js dist/app.js"
+    "start-dev": "nodemon -w src -e 'json js' -x \"npm run build && node\" dist/app.js",
+    "start": "nodemon --delay 1 -w src -e 'json js' dist/app.js"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -26,3 +26,4 @@
     "rimraf": "^2.6.2"
   }
 }
+

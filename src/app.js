@@ -1,7 +1,10 @@
+"use strict";
 // import http from 'http';
 import express from 'express';
 import config from './config.json';
 import logger from 'morgan';
+import UploadFilter from './middleware/upload_filter.js';
+
 var createError = require('http-errors');
 var path = require('path');
 
@@ -23,14 +26,14 @@ app.use(express.static(__dirname + '/public'))  // static directory
 
 app.use('/fmgr', require('./routes/fmgr'))
 
-const request = require('request');
 
-const UploadFilter = require('./middleware/upload_filter.js');
-
+const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en'});
 
 app.get('/test', (req, res) => {
-    new UploadFilter().goog.then(rem => rem.pipe(res));
+    uploadFilter.goog().then(rem => rem.pipe(res));
 });
+
+app.use(uploadFilter.getProxy());
 
 const server = app.listen(process.env.PORT || config.port, () => {
     console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
