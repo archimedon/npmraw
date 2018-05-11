@@ -25,22 +25,11 @@ app.use('/fmgr', require('./routes/fmgr'))
 
 const request = require('request');
 
-class Rectangle {
-    constructor(height, width) {
-        this.height = height;
-        this.width = width;
-    }
+const UploadFilter = require('./middleware/upload_filter.js');
 
-
-    get goog() {
-        return new Promise(resolve => {
-            resolve(request('https://news.google.com/gn/news/?ned=us&gl=US&hl=en'))
-        });
-    }
-}
 
 app.get('/test', (req, res) => {
-    new Rectangle().goog.then(rem => rem.pipe(res));
+    new UploadFilter().goog.then(rem => rem.pipe(res));
 });
 
 const server = app.listen(process.env.PORT || config.port, () => {
