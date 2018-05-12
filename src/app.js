@@ -38,23 +38,23 @@ app.get('/test', (req, res) => {
 
 // app.use(uploadFilter.getProxy());
 function read(req, ask) {
-    let form = new multiparty.Form({
-        encoding: "utf8",
-        maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
-        autoFields: true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
-        autoFiles: true          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
-    });
-    
-    let uplargs = {
-        bucketId: '',
-        destDir: '',
-        author: encodeURIComponent('editor@org.com')
-    };
-    let purl = 'non'
 
     function former(req) {
         return new Promise(resolve => {
-
+            let form = new multiparty.Form({
+                encoding: "utf8",
+                maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
+                autoFields: true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
+                autoFiles: true          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
+            });
+            
+            let uplargs = {
+                bucketId: '',
+                destDir: '',
+                author: encodeURIComponent('editor@org.com')
+            };
+            let purl = 'non'
+        
              let tmp = 'non'
              setTimeout(() => resolve(
                 form.parse(req, (err, fields, files) => {
