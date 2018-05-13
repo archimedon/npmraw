@@ -1,5 +1,7 @@
 
 "use strict";
+require("babel-polyfill");
+
 // var express = require('express');
 
 // var router = express.Router();
@@ -13,6 +15,7 @@
 // });
 
 // module.exports = router;
+let multiparty = require('multiparty');
 const request = require('request');
 
 const isUploadRegEx = new RegExp('(?:POST|PUT).*', 'i');
@@ -34,52 +37,44 @@ const isProxyPath = {
 }
 
 class UploadFilter {
- 
-    constructor(options) {
 
-        this.options = options || {};
-        this.options.aurl = '/freak'
-        let inpectForm = (req) => {
-        
+    inpectForm (req) {
+        return new Promise ( (resolve) => {
 
-            let remres = function (rq) {
-                let multiparty = require('multiparty');
             let form = new multiparty.Form({
                 encoding: "utf8",
                 maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
                 autoFields: true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
                 autoFiles: true          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
             });
-            let purl = 'non'
-                let uplargs = {
-                    bucketId: '',
-                    destDir: '',
-                    author: encodeURIComponent('editor@org.com')
-                };
-                return new Promise(resolve => {
-                
-                    form.parse(rq, (err, fields, files) => {
-                        Object.keys(fields).forEach(function (name) {
-                            uplargs[name] = encodeURIComponent(fields[name][0]);
-                            console.log('got field named: ' + name);
-                            console.log('got field value: ' + fields[name][0]);
-                        });
-                        purl = `/upload/${uplargs.bucketId}/${uplargs.author}/${uplargs.destDir}`;
+
+
+
             
-                        console.log('Upload completed!');
-                        console.log(`purl: ${purl}`);
-                        resolve(purl);
-                        //          res.setHeader('text/plain');
-                        //          res.end('Received ' + files.length + ' files');
-                    });
-                });
-            }
+            form.parse(rq, (err, fields, files) => {
 
-            remres(req).then(aurl => this.options.aurl = aurl)
-            return this.options.aurl;
-        }
+                const uplargs = {
+                    bucketId: '',
+                    author: encodeURIComponent('editor@org.com'),
+                    destDir: ''
+                };
     
+                Object.keys(fields).forEach(function (name) {
+                    uplargs[name] = encodeURIComponent(fields[name][0]);
+                    console.log('got field named: ' + name);
+                    console.log('got field value: ' + fields[name][0]);
+                });
+                console.log('Upload completed!');
 
+                resolve(`/upload/${uplargs.bucketId}/${uplargs.author}/${uplargs.destDir}`);
+            });
+        });
+    }
+
+    constructor(options) {
+
+        this.options = options || {};
+        this.options.aurl = '/freak'
         this.options.target = options.target || 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en'
 
         if (!options.fsroute) this.options.fsroute = '/cfs';    
@@ -87,29 +82,27 @@ class UploadFilter {
         if (!options.changeOrigin) this.options.changeOrigin = false;
         if (!options.ws) this.options.ws = false;
     
-        if (!options.pathRewrite) this.options.pathRewrite = function(path, req) {
+        if (!options.pathRewrite) this.options.pathRewrite = async function(path, req) {
             let purl = '/junk'
             if (isProxyRegEx.test(path)) {
                 purl = path.replace(isProxyRegEx, '/$1')
                 console.log('isProxyRegEx pathRewrite= ' + purl);
             } else {
                 console.log('making redir');
-    
-    
-                purl = inpectForm(req);
+                purl = await this.inpectForm(req);
                 console.log('purl', purl);
             }
             return purl;
         }
 
         
-        if (!options.onProxyReq) this.options.onProxyReq = (proxyReq, req, res, options) => {
+        // if (!options.onProxyReq) this.options.onProxyReq = async (proxyReq, req, res, options) => {
 
-            purl = inpectForm(req);
-            console.log('purl', purl);
+        //     purl = await this.inpectForm(req);
+        //     console.log('purl', purl);
 
-            // proxyReq.setHeader('X-Special-Proxy-Header', 'foobar');
-        };
+        //     // proxyReq.setHeader('X-Special-Proxy-Header', 'foobar');
+        // };
 
         if (!options.onProxyRes) this.options.onProxyRes = (proxyRes, req, res) => {
             let body = "";
@@ -133,6 +126,7 @@ class UploadFilter {
     
     }
 
+
     goog() {
         console.log('this.options', this.options);
         
@@ -143,7 +137,6 @@ class UploadFilter {
          });
     }
 
-   
     
     getProxy() {
         var filter = (pathname, req) => {

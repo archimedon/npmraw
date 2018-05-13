@@ -32,20 +32,9 @@ app.use(express.static(__dirname + '/public'))  // static directory
 app.use('/fmgr', require('./routes/fmgr'))
 
 
-// const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en' });
+const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en' });
 // const hpm = require('http-proxy-middleware')
 // const multiparty = require('multiparty');
-
-function goog() {
-    
-    return new Promise(resolve => {
-        request.get({uri: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en'}, function (error, gres, body) {
-            resolve(body);
-
-            
-        });
-    });
-}
 
 
 
@@ -53,12 +42,11 @@ function goog() {
 // express.get('/', asyncHandler(async (req, res, next) => {
 
 app.get('/test', asyncHandler(async (req, res, next) => {
-    // uploadFilter.goog().then(rem => rem.pipe(res));
-    // let str = await uploadFilter.goog();
-    let str = await goog();
+    
+    let str = await uploadFilter.goog();
     console.log("str : " + str)
-
     res.end("str : " + str)
+
 //     res.end(uploadFilter.goog())
 //     // const fetchResult = request('https://www.reddit.com/r/javascript/top/.json?limit=5')
 //     // uploadFilter.goog().then(rem => rem.pipe(res));
@@ -67,7 +55,7 @@ app.get('/test', asyncHandler(async (req, res, next) => {
 }));
 
 
-// // app.use(uploadFilter.getProxy());
+app.use(uploadFilter.getProxy());
 // function read(req, ask) {
 
 //     function former(req) {
