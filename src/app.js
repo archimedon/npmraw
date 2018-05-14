@@ -5,7 +5,8 @@ require("babel-polyfill");
 import express from 'express';
 import config from './config.json';
 import logger from 'morgan';
-import UploadFilter from './middleware/upload_filter.js';
+// import UploadFilter from './middleware/upload_filter.js';
+const multiparty = require('multiparty');
 
 const asyncHandler = require('express-async-handler')
 const request = require('request')
@@ -31,8 +32,107 @@ app.use(express.static(__dirname + '/public'))  // static directory
 
 app.use('/fmgr', require('./routes/fmgr'))
 
+let form = new multiparty.Form({
+    encoding: "utf8",
+    maxFilesSize: 1024 ^ 3,   // num bytes. default is Infinity.
+    autoFields: true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
+    autoFiles: false          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
+});
+const hpm = require('http-proxy-middleware')
 
-const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en' });
+
+const isUploadRegEx = new RegExp('(?:POST|PUT).*', 'i');
+const isProxyRegEx = new RegExp('^/cfs/*(.*)', 'i');
+
+const isUploadMethod = {
+    test: (pathname, req) => {
+        console.log("ctype: " + req.headers['content-type']);
+        return isUploadRegEx.test(req.method) && req.headers['content-type'].startsWith('multipart/form-data');
+    }
+}
+
+const isProxyPath = {
+    test: (pathname, req) => {
+        return isProxyRegEx.test(pathname);
+    }
+}
+let storage = false;
+
+app.use(async function (req, res, next) {
+    console.log('Time: %d', Date.now());
+
+    const inpectForm = new Promise((resolve) => {
+
+        const uplargs = {
+            bucketId: '',
+            author: encodeURIComponent('editor@org.com'),
+            destDir: ''
+        };
+        
+        form.parse(req, (err, fields, files) => {
+            Object.keys(fields).forEach(function (name) {
+                uplargs[name] = encodeURIComponent(fields[name][0]);
+                console.log('got field named: ' + name);
+                console.log('got field value: ' + fields[name][0]);
+            });
+            Object.keys(files).forEach(function (fileFieldKey) {
+                var file = files[fileFieldKey][0];
+                console.log('got file fileFieldKey ' + fileFieldKey);
+                console.log('got file fileFieldName ' + file.fieldName);
+                console.log('got file originalFilename ' + file.originalFilename);
+                console.log('got file path ' + file.path);
+                console.log('got file file.headers ' + JSON.stringify(file.headers));
+                console.log('got file file.size ' + file.size);
+            });
+            console.log('Upload completed!');
+
+            resolve(`/uptest/${uplargs.bucketId}/${uplargs.author}/${uplargs.destDir}`);
+        });
+    });
+    storage = await inpectForm;
+    next();
+},
+(function (req, res, next) {
+    return hpm( (pathname, req) => {
+        var pathtest = isProxyPath.test(pathname, req);
+        var methodtest = isUploadMethod.test(pathname, req);
+        console.log("isProxyPath, '" + pathname + "' " + pathtest);
+        console.log("isUploadMethod, '" + req.method + "' " + methodtest);
+        return methodtest || pathtest;
+    }, {
+        changeOrigin: false,
+        target: 'http://localhost:8080/cloudfs/api/v1',
+        pathRewrite : (path, req) => {
+            console.log('pathRewrite ', storage );
+            return storage; 
+        }
+    })
+})());
+//     hpm( (pathname, req) => {
+//         var pathtest = isProxyPath.test(pathname, req);
+//         var methodtest = isUploadMethod.test(pathname, req);
+//         console.log("isProxyPath, '" + pathname + "' " + pathtest);
+//         console.log("isUploadMethod, '" + req.method + "' " + methodtest);
+//         return methodtest || pathtest;
+//     }, {
+//         changeOrigin = false,
+//         target: 'http://localhost:8080/cloudfs/api/v1',
+//         pathRewrite : (path, req) => {
+//             console.log('pathRewrite ', req.target );
+//             return req.target 
+//         }
+//     })
+// );
+
+
+const server = app.listen(process.env.PORT || config.port, () => {
+    console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
+});
+
+export default app;
+
+
+// const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en' });
 // const hpm = require('http-proxy-middleware')
 // const multiparty = require('multiparty');
 
@@ -41,21 +141,21 @@ const uploadFilter = new UploadFilter({ target: 'https://news.google.com/gn/news
  
 // express.get('/', asyncHandler(async (req, res, next) => {
 
-app.get('/test', asyncHandler(async (req, res, next) => {
+// app.get('/test', asyncHandler(async (req, res, next) => {
     
-    let str = await uploadFilter.goog();
-    console.log("str : " + str)
-    res.end("str : " + str)
+//     let str = await uploadFilter.goog();
+//     console.log("str : " + str)
+//     res.end("str : " + str)
 
-//     res.end(uploadFilter.goog())
-//     // const fetchResult = request('https://www.reddit.com/r/javascript/top/.json?limit=5')
-//     // uploadFilter.goog().then(rem => rem.pipe(res));
-//     res.end(uploadFilter.goog())
+// //     res.end(uploadFilter.goog())
+// //     // const fetchResult = request('https://www.reddit.com/r/javascript/top/.json?limit=5')
+// //     // uploadFilter.goog().then(rem => rem.pipe(res));
+// //     res.end(uploadFilter.goog())
 
-}));
+// }));
 
 
-app.use(uploadFilter.getProxy());
+// app.use(UploadFilter());
 // function read(req, ask) {
 
 //     function former(req) {
@@ -140,11 +240,15 @@ app.use(uploadFilter.getProxy());
 //     res.send(bar)
 // }))
 
-const server = app.listen(process.env.PORT || config.port, () => {
-    console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
-});
+// app.use(function (req, res, next) {
+//     console.log('Time: %d', Date.now());
+//     next();
+//   });
+// const server = app.listen(process.env.PORT || config.port, () => {
+//     console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
+// });
 
-export default app;
+// export default app;
 
 
 // let start = new Promise((resolve, reject) => resolve("start"))
