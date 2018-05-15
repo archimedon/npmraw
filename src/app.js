@@ -30,8 +30,21 @@ app.set('view engine', 'pug');
 // Static pages
 app.use(express.static(__dirname + '/public'))  // static directory
 
-app.use('/fmgr', require('./routes/fmgr'))
-app.use(uploadFilter);
+app.use('/fmgr', require('./routes/fmgr'));
+const passThruFn = (proxyErr, proxyResp, proxyBody, req, res) => {
+    res.setHeader("content-type", "application/json");
+    res.end(JSON.stringify(proxyBody));
+};
+app.use(uploadFilter({
+    parseProxyResponse: passThruFn,
+    proxyRoutes: [
+        {
+            'method' : 'GET',
+            'path' : '/dav',
+            'handler' : passThruFn
+        }
+    ]
+}));
 
 
 
