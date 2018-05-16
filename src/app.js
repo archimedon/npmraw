@@ -6,7 +6,7 @@ import express from 'express';
 import config from './config.json';
 import logger from 'morgan';
 
-import uploadFilter from './middleware/upload_filter.js';
+import UploadFilter from './middleware/upload_filter.js';
 
 const asyncHandler = require('express-async-handler')
 const request = require('request')
@@ -35,18 +35,38 @@ const passThruFn = (proxyErr, proxyResp, proxyBody, req, res) => {
     res.setHeader("content-type", "application/json");
     res.end(JSON.stringify(proxyBody));
 };
-app.use(uploadFilter({
-    parseProxyResponse: passThruFn,
-    proxyRoutes: [
-        {
-            'method' : 'GET',
-            'path' : '/dav',
-            'handler' : passThruFn
-        }
-    ]
-}));
 
+const uploadFilter = new UploadFilter({
+    proxy_host: 'http://dev.rasajournal.com'
+    // proxy_host: 'http://localhost:8080/cloudfs/api/v1'
+    // proxy_host: 'https://news.google.com/gn/news/?ned=us&gl=US&hl=en'
 
+    
+})
+//         'access-control-allow-methods': 'ACCEPT, PROPFIND, PROPPATCH, COPY, MOVE, DELETE, MKCOL, LOCK, UNLOCK, PUT, GETLIB, VERSION-CONTROL, CHECKIN, CHECKOUT, UNCHECKOUT, REPORT, UPDATE, CANCELUPLOAD, HEAD, OPTIONS, GET, POST',
+
+let davRoute = uploadFilter
+    .addProxyRoute('/dav').asGet()
+    .reqHandler((req, reqData) => req.originalUrl.replace(davRoute.path, '/PUBLISHER') )
+    .respHandler( (proxyErr, proxyResp, proxyBody, req, res) => {
+        // let localRefPattern = new RegExp('((?:src|href))="/PUBLISHER([^\'|"]+)"$2"', "i");
+        // .replace(localRefPattern, "$1=$2/da")
+        console.log('headers', proxyResp.headers)
+        // proxyResp.pipe(res)
+        // 'content-type': 'text/html;charset=ISO-8859-1'
+
+        res.end(
+            proxyResp.headers['content-type'].startsWith('application/json')
+            ? JSON.stringify(proxyBody)
+            //str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            : proxyResp.headers['content-type'].startsWith('text/html')
+                ? proxyBody.replace(/\/PUBLISHER/g, davRoute.path)
+                : proxyBody
+        );
+    });
+console.log("uploadFilter: " + uploadFilter.getProxyRoutes());
+
+app.use(uploadFilter.getRoute());
 
 const server = app.listen(process.env.PORT || config.port, () => {
     console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
