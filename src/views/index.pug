@@ -1,5 +1,79 @@
 extends layout
 
+mixin listAuths(authors)
+  ul(class="list-items")
+    each author in authors
+      - var aid = author.ID;
+      - var posts = author_posts[aid];
+      - var trgtprop = 'authors/' + aid;
+      
+      li(class='author select_link', id=trgtprop) #{author.display_name}
+
+  script.
+    $(function(){
+      $('.author').click(function(e){
+        e.preventDefault();
+        console.log('aid', $(this).attr("id"));
+        $('#author_posts').show().load('http://localhost:3001/' + $(this).attr("id") + '/posts');
+      });				
+    });
+
 block content
-  h1= title
-  p Welcome to #{title}
+  h1=Publisher
+
+  <!-- Board info bar -->
+  <section class="board-info-bar">
+
+    <div class="board-controls">
+
+      <div class="board-title btn"><h2>Rasa CMS - Publisher</h2></div>
+      <div class="star-btn btn"><i class="far fa-star"></i> </div>
+
+      <div class="personal-btn btn">
+      Personal sdaff
+      </div>
+
+    </div>
+
+    <div class="menu-btn btn"><i class="fas fa-ellipsis-h menu-btn-icon"></i>Show Menu</div>
+
+  </section>
+  <!-- End of board info bar -->
+
+  <!-- Lists container -->
+  <section class="lists-container">
+
+    <div class="list">
+      <h3 class="list-title">Authors</h3>
+      +listAuths(authors)
+    </div>
+    <div class="list" style="display: none;" id="author_posts">
+    </div>
+
+    <div class="list">
+      <h3 class="list-title">Categories</h3>
+      <ul class="list-items">
+        each category in categories
+          li(value=category.term_id) /#{category.parentName}/#{category.name}
+      </ul>
+    </div>
+
+  <div class="add-list">Add a list...</div>
+
+  </section>
+  <!-- End of lists container -->
+
+
+//- ,{
+//-   "ID":572,
+//-   "post_title":"Irreverent Sanskrit Verse",
+//-   "post_name":"irreverent-sanskrit-verse",
+//-   "post_date":"2016-11-05 07:20:53","post_status":"publish"
+//-   },
+//- {"ID":77,"post_title":"Selling Yoga: From Counterculture to Pop Culture","post_name":"selling-yoga-from-counterculture-to-pop-culture","post_date":"2016-11-02 05:59:59","post_status":"publish"},{"ID":15,"post_title":"Flirting with Shakti:  Tantric Insights in Dealing with Our Inner Shadow","post_name":"flirting-with-shakti-tantric-insights-in-dealing-with-our-inner-shadow","post_date":"2016-10-20 15:34:29","post_status":"publish"},{"ID":9,"post_title":"Incarnations - India in Fifty Lives","post_name":"incarnations-india-in-fifty-lives","post_date":"2016-10-20 15:31:51","post_status":"publish"},{"ID":148,"post_title":"Translating Rasul Mir: Poet of Kashmir","post_name":"translating-rasul-mir","post_date":"2016-06-22 01:49:35","post_status":"publish"}]
+
+
+//-  "ID","post_title","post_name","post_date","post_status","post_author"
+//- {"ID":148,"post_title":"Translating Rasul Mir: Poet of Kashmir","post_name":"translating-rasul-mir","post_status":"publish","post_author":"2"}
+//-  {"ID":148,"post_title":"Translating Rasul Mir: Poet of Kashmir","post_name":"translating-rasul-mir","post_status":"publish","post_author":"2"}]
+//- wp post list --post_type=post  --fields=ID,post_title,post_name,post_status,post_author  --format=json
