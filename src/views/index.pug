@@ -7,14 +7,27 @@ mixin listAuths(authors)
       - var posts = author_posts[aid];
       - var trgtprop = 'authors/' + aid;
       
-      li(class='author select_link', id=trgtprop) #{author.display_name}
+      li(class='author select_link', id=trgtprop)
+        div
+          input(class="dz-hidden-input", type="radio", name="author_id", id='author_id_' + aid, value=aid)
+          label(for='author_id_' + aid) #{author.display_name}
 
   script.
     $(function() {
       $('.author').click(function(e){
         e.preventDefault();
-        console.log('author_posts', $(this).attr("id"));
-        $('#author_posts').show().load('http://localhost:3001/' + $(this).attr("id") + '/posts');
+        var iSelf = $(this);
+        console.log('author_posts', iSelf.attr("id"));
+        iSelf.siblings().css('background-color', '#fff')
+        iSelf.siblings().find('input:radio').prop("checked", false)
+
+        var chbx = $(iSelf.find('input:radio')[0]);
+        var stat = chbx.prop("checked");
+        console.log('chbx', chbx)
+        chbx.prop("checked", ! stat);
+        $(this).css('background-color', stat ? '#fff' : '#aaa');
+
+        $('#author_posts').show().load('http://localhost:3001/' + iSelf.attr("id") + '/posts');
       });
       $('.category').click(function(e) {
         e.preventDefault();
@@ -54,11 +67,18 @@ block content
     <div style="display: inline-block; width: 300px; height: 320px;">
       <div class="list" id="post_block" style="display: none;  width: 28em; height: 36em; text-align: center;">
         <span class="list-title"><h3>Create Article</h3> Upload: .doc, header image</span>
-        <ul class="list-items">
-        <div class="dropzone dropzone-previews" id="post_block_form" style="display: inline-block; background-color: #727476; border-radius: 0.3rem; margin: auto; position: relative; border: 1px solid orange; width: 26em; height: 26em;"></div>
-        </ul>
+        <div class="dropzone" id="post_block_form" style="display: inline-block; background-color: #727476; border-radius: 0.3rem; margin: auto; position: relative; border: 1px solid orange; width: 26em; height: 26em;"></div>
+
+        <div class="list">
+          <h3 class="list-title">Uploads</h3>
+          <ul class="list-items">
+            <li class="dropzone-previews"></li>
+          </ul>
+        </div>
+  
       </div>
     </div>
+
 
     <div class="list" id="categories" style="display: none;">
       <h3 class="list-title">Categories</h3>
@@ -66,11 +86,11 @@ block content
         each category in categories
           li(class='category')
             div
-              input(type="checkbox", id='category/' + category.term_id, name="category", value=category.term_id)
+              input(class="dz-hidden-input", type="checkbox", id='category/' + category.term_id, name="category", value=category.term_id)
               label(for='category/' + category.term_id) /#{category.parentName}/#{category.name}
     </div>
    
-    <div class="add-list">Add a list...</div>
+    <div class="add-list" id="submit">Submit Article</div>
 
 
 

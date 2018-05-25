@@ -12,37 +12,12 @@ block content
 
   script.
     $(function() {
-      var readyup = {
-        'doc': false,
-        'header': false,
-        'category': false
-      };
       $('.new_post').click(function(e) {
         var self = $(this);
         console.log('self.attr("id")', self.attr("id"));
         e.preventDefault();
         $('#post_block').show();
-        $('div#post_block_form').dropzone({
-          url: '/' + self.attr("id"),
-          previewsContainer: ".dropzone-previews",
-          autoProcessQueue: false,
-          autoQueue: true,
-          uploadMultiple: true,
-          accept: function(file, done) {
-            if ((/\.docx*$/i).test(file.name)) {
-              readyup.doc = true;
-              done("Add Header image");
-            }
-            else if ((/\.(?:tiff|jpg|png|gif)$/i).test(file.name)) {
-              readyup.header = true;
-              done("Add Document");
-            }
-            if (readyup.header && readyup.doc) {
-              $('#categories').show();
-            }
-            console.log('file.name', file.name);
-          }
-        })
+        Dropzone.options.postBlockForm.url = '/' + self.attr("id");
       });
     });
     
