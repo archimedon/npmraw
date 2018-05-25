@@ -5,39 +5,6 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='http://code.jquery.com/jquery-1.6.2.min.js')
     script(src='/javascripts/dropzone.js')
-    script.
-      $(function() {
-      var readyup = {
-        'doc': false,
-        'header': false,
-        'category': false
-      };
-        
-        Dropzone.options.postBlockForm = { // The camelized version of the ID of the form element
-          url: '/file',
-          previewsContainer: ".dropzone-previews",
-          autoProcessQueue: false,
-          autoQueue: true,
-          uploadMultiple: true,
-          accept: function(file, done) {
-            if ((/\.docx*$/i).test(file.name)) {
-              readyup.doc = true;
-              done();
-            }
-            else if ((/\.(?:tiff|jpg|png|gif)$/i).test(file.name)) {
-              readyup.header = true;
-              done();
-            }
-            if (readyup.header && readyup.doc) {
-              $('#categories').show();
-            }
-            console.log('file.name', file.name);
-          },
-          parallelUploads: 2,
-          addRemoveLinks: true,
-          maxFiles: 2
-        }
-      });
 
   body
     block content
