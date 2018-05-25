@@ -1,7 +1,7 @@
 extends layout
 
 mixin listAuths(authors)
-  ul(class="list-items")
+  ul(class="list-items authors_list")
     each author in authors
       - var aid = author.ID;
       - var posts = author_posts[aid];
@@ -10,12 +10,19 @@ mixin listAuths(authors)
       li(class='author select_link', id=trgtprop) #{author.display_name}
 
   script.
-    $(function(){
+    $(function() {
       $('.author').click(function(e){
         e.preventDefault();
-        console.log('aid', $(this).attr("id"));
+        console.log('author_posts', $(this).attr("id"));
         $('#author_posts').show().load('http://localhost:3001/' + $(this).attr("id") + '/posts');
-      });				
+      });
+      $('.category').click(function(e) {
+        e.preventDefault();
+        var chbx = $($(this).find('input')[0]);
+        var stat = chbx.prop("checked");
+        chbx.prop("checked", ! stat );
+        $(this).css('background-color', stat ? '#fff' : '#aaa');
+      });
     });
 
 block content
@@ -23,16 +30,10 @@ block content
 
   <!-- Board info bar -->
   <section class="board-info-bar">
-
     <div class="board-controls">
-
       <div class="board-title btn"><h2>Rasa CMS - Publisher</h2></div>
       <div class="star-btn btn"><i class="far fa-star"></i> </div>
-
-      <div class="personal-btn btn">
-      Personal sdaff
-      </div>
-
+      <div class="personal-btn btn">Personal sdaff</div>
     </div>
 
     <div class="menu-btn btn"><i class="fas fa-ellipsis-h menu-btn-icon"></i>Show Menu</div>
@@ -47,18 +48,33 @@ block content
       <h3 class="list-title">Authors</h3>
       +listAuths(authors)
     </div>
-    <div class="list" style="display: none;" id="author_posts">
+
+    <div class="list" style="display: none;" id="author_posts">author_posts</div>
+
+    <div style="display: inline-block; width: 300px; height: 320px;">
+      <div class="list" id="post_block" style="display: none;  width: 28em; height: 36em; text-align: center;">
+        <span class="list-title"><h3>Create Article</h3> Upload: .doc, header image</span>
+        <ul class="list-items">
+        <div class="dropzone dropzone-previews" id="post_block_form" style="display: inline-block; background-color: #727476; border-radius: 0.3rem; margin: auto; position: relative; border: 1px solid orange; width: 26em; height: 26em;"></div>
+        </ul>
+      </div>
     </div>
 
-    <div class="list">
+    <div class="list" id="categories" style="display: none;">
       <h3 class="list-title">Categories</h3>
-      <ul class="list-items">
+      ul(class="list-items")
         each category in categories
-          li(value=category.term_id) /#{category.parentName}/#{category.name}
-      </ul>
+          li(class='category')
+            div
+              input(type="checkbox", id='category/' + category.term_id, name="category", value=category.term_id)
+              label(for='category/' + category.term_id) /#{category.parentName}/#{category.name}
     </div>
+   
+    <div class="add-list">Add a list...</div>
 
-  <div class="add-list">Add a list...</div>
+
+
+
 
   </section>
   <!-- End of lists container -->

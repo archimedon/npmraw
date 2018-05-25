@@ -1,30 +1,48 @@
 mixin listPosts(author, posts)
-  ul(class="list-items posts")
-    li(class="add-card", id='authors/' + author.ID + '/posts') Add an Article... 
+  ul(class="posts list-items")
+    li(class="new_post add-card", id='/posts/authors/' + author.ID) Add an Article... 
     if posts
       each art in posts
         li(id='authors/' + author.ID + '/posts/' + art.ID) #{art.post_title}
 
-  
 block content
-
-  script.
-    $(function(){
-      $('.add-card').click(function(e) {
-        $('#new_author_post').show();
-      });
-      $('.select_link').click(function(e) {
-        e.preventDefault();
-        let butn = $(this)
-        console.log('aid', butn.attr("id"));
-        $('#author_posts').show().load('http://localhost:3001/' + butn.attr("id"));
-      });
-    });
 
   <h3 class="list-title">#{author.display_name}</h3>
   +listPosts(author, posts)
-  <div class="aoth" id="new_author_post" style="display: none;">
-    form(action="#{trgtprop}" class="dropzone" id="my-awesome-dropzone")
-  </div>
 
-
+  script.
+    $(function() {
+      var readyup = {
+        'doc': false,
+        'header': false,
+        'category': false
+      };
+      $('.new_post').click(function(e) {
+        var self = $(this);
+        console.log('self.attr("id")', self.attr("id"));
+        e.preventDefault();
+        $('#post_block').show();
+        $('div#post_block_form').dropzone({
+          url: '/' + self.attr("id"),
+          previewsContainer: ".dropzone-previews",
+          autoProcessQueue: false,
+          autoQueue: true,
+          uploadMultiple: true,
+          accept: function(file, done) {
+            if ((/\.docx*$/i).test(file.name)) {
+              readyup.doc = true;
+              done("Add Header image");
+            }
+            else if ((/\.(?:tiff|jpg|png|gif)$/i).test(file.name)) {
+              readyup.header = true;
+              done("Add Document");
+            }
+            if (readyup.header && readyup.doc) {
+              $('#categories').show();
+            }
+            console.log('file.name', file.name);
+          }
+        })
+      });
+    });
+    

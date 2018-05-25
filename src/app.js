@@ -58,6 +58,19 @@ app.get('/cms', async (req, res) => {
 app.get('/', async (req, res) => {
     res.render('index', dat)
 });
+
+// let author_post_renderFn = pug.compileFile('pug_parts/author_posts.pug')
+
+
+// viewed at http://localhost:8080
+// app.get('/', function(req, res) {
+//     res.sendFile(path.join(__dirname + '/index.html'));
+// });
+
+// res.writeHead(200, {'Content-Type': 'text/html'});
+// fs.createReadStream('index.html').pipe(res);
+
+
 app.get('/authors/:aid/posts', async (req, res) => {
     let author = dat.authors.find( element => element.ID == req.params.aid );
     console.log('author', author);

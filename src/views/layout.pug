@@ -5,6 +5,10 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='http://code.jquery.com/jquery-1.6.2.min.js')
     script(src='/javascripts/dropzone.js')
+    script.
+      $(function() {
+        Dropzone.autoDiscover = false;
+      });
 
   body
     block content
