@@ -10,27 +10,30 @@ mixin listAuthors(authors)
       li(class='author select_link', id=trgtprop)
         div
           input(class="dz-hidden-input", type="radio", name="author_id", id='author_id_' + aid, value=aid)
-          <b>#{author.display_name}</b>
+          label(for='author_id_' + aid) #{author.display_name}
 
   script.
     $(function() {
+      
+      function showStat(self, statval) {
+        var chbx = self.find(':radio, :checkbox');
+        if (chbx.length) {
+          $(chbx[0]).prop("checked", statval);
+        }
+        self.data('ustat', statval);
+      }
+      $('.select_link label').click(function(event) {
+        event.preventDefault();
+      });
       $('li.select_link').bind('enable', function(event) {
         var self = $(this);
         self.siblings().trigger('disable')
         self.css('background-color', '#aaa')
-        var chbx = self.find(':radio, :checkbox');
-        if (chbx.length) {
-          $(chbx[0]).prop("checked", true);
-        }
-        self.data('ustat', true);
+        showStat(self, true);
       }).bind('disable', function(event) {
         var self = $(this);
         self.css('background-color', '#fff');
-        var chbx = self.find(':radio, :checkbox');
-        if (chbx.length) {
-          $(chbx[0]).prop("checked", false);
-        }
-        self.data('ustat', false);
+        showStat(self, false);
       }).bind('click', function(event) {
         //- event.preventDefault();
         //- event.stopImmediatePropagation();
