@@ -14,37 +14,43 @@ mixin listAuthors(authors)
 
   script.
     $(function() {
-      
-      function showStat(self, statval) {
-        var chbx = self.find(':radio, :checkbox');
-        if (chbx.length) {
-          $(chbx[0]).prop("checked", statval);
-        }
-        self.data('ustat', statval);
-      }
-      $('.select_link label').click(function(event) {
-        event.preventDefault();
-      });
-      $('li.select_link').bind('enable', function(event) {
-        var self = $(this);
-        self.siblings().trigger('disable')
-        self.css('background-color', '#aaa')
-        showStat(self, true);
-      }).bind('disable', function(event) {
-        var self = $(this);
-        self.css('background-color', '#fff');
-        showStat(self, false);
-      }).bind('click', function(event) {
+      $( "li.select_link label" ).on( "click", function(event) {
         //- event.preventDefault();
         //- event.stopImmediatePropagation();
-        $(this).trigger($(this).data('ustat') ? 'disable' : 'enable');
+        //- event.stopPropagation();
       });
+
+      $( ".list-items" ).on( "redraw", function(event) {
+        $(this).children("li.select_link").trigger('showstat');
+      });
+      
+      $( "li.select_link" ).on('showstat', function(event) {
+        var self = $(this);
+        $(this).find(':radio, :checkbox').each( function (i, input) {
+          self.toggleClass( "active", input.checked);
+        });
+      })
+      .on( "change", "input", function(event) {
+        $(this).closest('ul').trigger('redraw');
+      })
+      .on('click', function(event) {
+        // Only on non-input events, lest it'll unset the user choice
+        if ( ! $(this).hasClass( "active" )) {
+          $(this).find(':radio, :checkbox').each( function (i, input) {
+            if (event.target.tagName.toUpperCase() != 'INPUT') {
+              input.checked = ! input.checked;
+            }
+            $(input).trigger('change');              
+          });
+        }
+      });
+
       $('.author').click(function(event) {
-        if ($(this).data('ustat')) {
-          $('#author_posts').show().load('http://localhost:3001/' + $(this).attr("id") + '/posts');
-        } else {
-          $('#dropzone-previews').empty().hide();
-          $('#author_posts').empty().hide();
+        var refId = $(this).attr("id");
+        if ($(this).hasClass( "active" ) && $('#author_posts').data("ref") != refId ) {
+          //- $('#dropzone-previews').empty().hide();
+          //- $('#author_posts').empty().hide();
+          $('#author_posts').data("ref", refId ).empty().show().load('http://localhost:3001/' + refId + '/posts');
         }
       });
     });
@@ -75,14 +81,14 @@ block content
 
     <div class="list" style="display: none;" id="author_posts">author_posts</div>
 
-    <div class="list">
+    <div class="list" id="previewzone" style="display: none;">
       <h3 class="list-title">Uploads</h3>
       <ul class="list-items">
         <li class="dropzone-previews"></li>
       </ul>
     </div>
 
-    <div class="list" id="categories">
+    <div class="list" id="categories" style="display: none;">
       <h3 class="list-title">Categories</h3>
       ul(class="list-items")
         each category in categories
