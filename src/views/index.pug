@@ -1,6 +1,6 @@
 extends layout
 
-mixin listAuths(authors)
+mixin listAuthors(authors)
   ul(class="list-items authors_list")
     each author in authors
       - var aid = author.ID;
@@ -10,31 +10,39 @@ mixin listAuths(authors)
       li(class='author select_link', id=trgtprop)
         div
           input(class="dz-hidden-input", type="radio", name="author_id", id='author_id_' + aid, value=aid)
-          label(for='author_id_' + aid) #{author.display_name}
+          <b>#{author.display_name}</b>
 
   script.
     $(function() {
-      $('.author').click(function(e){
-        e.preventDefault();
-        var iSelf = $(this);
-        console.log('author_posts', iSelf.attr("id"));
-        iSelf.siblings().css('background-color', '#fff')
-        iSelf.siblings().find('input:radio').prop("checked", false)
-        var chbx = $(iSelf.find('input:radio')[0]);
-        var stat = chbx.prop("checked");
-        console.log('chbx', chbx)
-        chbx.prop("checked", ! stat);
-        $(this).css('background-color', stat ? '#fff' : '#aaa');
-        $('#dropzone-previews').empty()
-        $('#categories').empty().hide()
-        $('#author_posts').show().empty().load('http://localhost:3001/' + iSelf.attr("id") + '/posts');
+      $('li.select_link').bind('enable', function(event) {
+        var self = $(this);
+        self.siblings().trigger('disable')
+        self.css('background-color', '#aaa')
+        var chbx = self.find(':radio, :checkbox');
+        if (chbx.length) {
+          $(chbx[0]).prop("checked", true);
+        }
+        self.data('ustat', true);
+      }).bind('disable', function(event) {
+        var self = $(this);
+        self.css('background-color', '#fff');
+        var chbx = self.find(':radio, :checkbox');
+        if (chbx.length) {
+          $(chbx[0]).prop("checked", false);
+        }
+        self.data('ustat', false);
+      }).bind('click', function(event) {
+        //- event.preventDefault();
+        //- event.stopImmediatePropagation();
+        $(this).trigger($(this).data('ustat') ? 'disable' : 'enable');
       });
-      $('.category').click(function(e) {
-        e.preventDefault();
-        var chbx = $($(this).find('input')[0]);
-        var stat = chbx.prop("checked");
-        chbx.prop("checked", ! stat );
-        $(this).css('background-color', stat ? '#fff' : '#aaa');
+      $('.author').click(function(event) {
+        if ($(this).data('ustat')) {
+          $('#author_posts').show().load('http://localhost:3001/' + $(this).attr("id") + '/posts');
+        } else {
+          $('#dropzone-previews').empty().hide();
+          $('#author_posts').empty().hide();
+        }
       });
     });
 
@@ -59,7 +67,7 @@ block content
 
     <div class="list">
       <h3 class="list-title">Authors</h3>
-      +listAuths(authors)
+      +listAuthors(authors)
     </div>
 
     <div class="list" style="display: none;" id="author_posts">author_posts</div>
@@ -75,7 +83,7 @@ block content
       <h3 class="list-title">Categories</h3>
       ul(class="list-items")
         each category in categories
-          li(class='category')
+          li(class='category select_link')
             div
               input(class="dz-hidden-input", type="checkbox", id='category/' + category.term_id, name="category", value=category.term_id)
               label(for='category/' + category.term_id) /#{category.parentName}/#{category.name}
