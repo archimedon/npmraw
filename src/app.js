@@ -27,30 +27,37 @@ app.set('view engine', 'pug');
 
 // Static pages
 app.use(express.static(__dirname + '/public'))  // static directory
-let dat = {};
-request.get('http://localhost/wp-content/uploads/categories.json', function(error, response, body){
-    if(error) console.log(error);
-    dat.categories = JSON.parse(body);
-    console.log(body)
-})
+let dat = config.dat;
+dat.author_posts = {}
+dat.posts.forEach(element => {
+    let aid = parseInt(element.post_author);
+    if (! dat.author_posts[aid]) dat.author_posts[aid] = [];
+    dat.author_posts[aid].push(element);
+});
 
-request('http://localhost/wp-content/uploads/authors.json', function(error, response, body){
-    if(error) console.log(error);
-    console.log(body)
-    dat.authors = JSON.parse(body);
-})
+// request.get('http://localhost/wp-content/uploads/categories.json', function(error, response, body){
+//     if(error) console.log(error);
+//     dat.categories = JSON.parse(body);
+//     console.log(body)
+// })
 
-request('http://localhost/wp-content/uploads/articles.json', function(error, response, body){
-    if(error) console.log(error);
-    dat.posts = JSON.parse(body);
-    dat.author_posts = {}
-    dat.posts.forEach(element => {
-        let aid = parseInt(element.post_author);
-        if (! dat.author_posts[aid]) dat.author_posts[aid] = [];
-        dat.author_posts[aid].push(element);
-    });
+// request('http://localhost/wp-content/uploads/authors.json', function(error, response, body){
+//     if(error) console.log(error);
+//     console.log(body)
+//     dat.authors = JSON.parse(body);
+// })
+
+// request('http://localhost/wp-content/uploads/articles.json', function(error, response, body){
+//     if(error) console.log(error);
+//     dat.posts = JSON.parse(body);
+//     dat.author_posts = {}
+//     dat.posts.forEach(element => {
+//         let aid = parseInt(element.post_author);
+//         if (! dat.author_posts[aid]) dat.author_posts[aid] = [];
+//         dat.author_posts[aid].push(element);
+//     });
     
-})
+// })
 
 app.get('/cms', async (req, res) => {
     res.render('cms', dat)
