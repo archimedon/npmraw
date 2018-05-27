@@ -84,8 +84,10 @@ mixin listAuthors(authors)
               }
             });
 
-            this.on("success", function (file, responseText) {
-                console.log(responseText);
+            this.on("completemultiple", function (responseText) {
+                dzClosure.removeAllFiles();
+                $('#post_block').trigger('finish', dzClosure);
+                alert(responseText);
             });
 
             //send all the form data along with the files:
@@ -106,6 +108,9 @@ mixin listAuthors(authors)
               dzClosure._cdat += 1;
               console.log('_cdat', dzClosure._cdat);
               console.log('file', file);
+              if (dzClosure._cdat == 2) {
+                 $('#categories').show();
+              }
               // Show submit button here and/or inform user to click it.
             });
 
@@ -124,6 +129,7 @@ mixin listAuthors(authors)
           }
         };
       }
+        var postBlockForm = new Dropzone("#post_block_form", getOpts('/posts/authors/12'));
 
       //- $('#post_block_form').dropzone();
 
@@ -132,8 +138,15 @@ mixin listAuthors(authors)
       //- $('#post_block_form').dropzone(zoneOpts);
       $('#author_posts').on('click', '.new_post', function(e) {
         var self = $(this);
-        var postBlockForm = new Dropzone("#post_block_form", getOpts(self.attr("id")));
         console.log('self.attr("id")', self.attr("id"));
+        postBlockForm.options.url = self.attr("id");
+        postBlockForm.enable();
+        $('#post_block').on('finish', function( event, data) {
+          data.disable()
+          $(this).hide();
+          $('#previewzone').hide();
+          $('#categories').hide();
+        });
         $('#post_block').show();
         $('#previewzone').show();
 
@@ -170,7 +183,7 @@ block content
     <div class="list" style="display: none;" id="author_posts">author_posts</div>
     
     <div class="list" id="post_block" style="display: none; height: 36em; text-align: center;">
-      <span class="list-title"><h3>Create Article</h3> Upload: .doc, header image</span>
+      <span class="list-title"><h3>Create Article</h3> Upload: Article (*.docx) &amp; header image (*.gif|jpg|png|tiff)</span>
       <form id="post_block_form" class="zone_form dropzone-previews" method="post" enctype="multipart/form-data"></form>
     </div>
 
