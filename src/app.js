@@ -97,26 +97,34 @@ app.get('/authors/:aid/posts', async (req, res) => {
 // app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
 const multiparty = require('multiparty');
 const fs = require('fs');
+var util = require('util');
 
 app.post( '/posts/authors/:aid', function( req, res, next ) {
     const reqData = {};
-    res.writeHead(200);
-    console.log(req.method);
-    console.log(req.headers);
-    console.log(req.url);
+    var form = new multiparty.Form();
+
+    form.parse(req, function(err, fields, files) {
+      res.writeHead(200, {'content-type': 'text/plain'});
+      res.write('received upload:\n\n');
+      res.end(util.inspect({fields: fields, files: files}));
+    });
+
+    // res.writeHead(200);
+    // console.log(req.method);
+    // console.log(req.headers);
+    // console.log(req.url);
     
-    var data = '';
-    req.on('data', function(chunk) {
-        data += chunk.toString();
-    });
-    req.on('end', function() {
-        console.log(data);
-        res.write('hi');
-        res.end();
-    });
+    // var data = '';
+    // req.on('data', function(chunk) {
+    //     data += chunk.toString();
+    // });
+    // req.on('end', function() {
+    //     console.log(data);
+    //     res.write('hi');
+    //     res.end();
+    // });
 });
 
-// const multiparty = require('multiparty');
 // const needle = require('needle');
 // const fs = require('fs');
 // const URL = require('url');

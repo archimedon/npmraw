@@ -20,7 +20,7 @@ mixin listAuthors(authors)
       $( "li.select_link label" ).on( "click", function(event) {
         //- event.preventDefault();
         //- event.stopImmediatePropagation();
-        //- event.stopPropagation();
+        event.stopPropagation();
       });
 
       $( ".list-items" ).on( "redraw", function(event) {
