@@ -54,7 +54,7 @@ mixin listAuthors(authors)
         if ($(this).hasClass( "active" ) && $('#author_posts').data("ref") != refId ) {
           //- $('#dropzone-previews').empty().hide();
           //- $('#author_posts').empty().hide();
-          $('#author_posts').data("ref", refId ).empty().show().load('http://localhost:3001/' + refId + '/posts');
+          $('#author_posts').data("ref", refId ).empty().show().load('/' + refId + '/posts');
         }
       });
 
