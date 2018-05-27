@@ -5,14 +5,27 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src='https://code.jquery.com/jquery-3.3.1.min.js')
     script(src='/javascripts/dropzone.js')
+    style(rel='stylesheet', href='/stylesheets/dropzone.css')
     style.
       .active {
-        background: #999;
-        color: #f6f6f6;
+        background-color: #999 !important;
+        color: #f6f6f6 !important;
       }
       .inactive {
-        background-color: #fff;
-        color: ##4d4d4d;
+        background-color: #fff !important;
+        color: ##4d4d4d !important;
       }
+      .zone_form {
+        display: inline-block;
+        background-color: #727476;
+        border-radius: 0.3rem;
+        margin: auto;
+        position: relative;
+        border: 1px solid orange;
+        width: 24em; height: 26em;
+      }
+    script.
+      Dropzone.autoDiscover = false;
+
   body
     block content

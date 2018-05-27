@@ -77,6 +77,57 @@ app.get('/authors/:aid/posts', async (req, res) => {
     res.render('author_posts', {'author': author, 'posts': dat.author_posts[req.params.aid]})
 });
 
+// app.get('/posts/authors/:aid', async (req, res) => {
+//     let author = dat.authors.find( element => element.ID == req.params.aid );
+//     console.log('author', author);
+//     res.render('new_post_form', {'author': author})
+// });
+
+// // var multer   =  require( 'multer' );
+// // var upload   =  multer( { dest: 'uploads/' } );
+// var bodyParser = require('body-parser')
+
+// // parse application/x-www-form-urlencoded
+// app.use(bodyParser.urlencoded({ extended: true }))
+
+// // parse application/json
+// app.use(bodyParser.json())
+
+// // parse application/vnd.api+json as json
+// app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
+const multiparty = require('multiparty');
+const fs = require('fs');
+
+app.post( '/posts/authors/:aid', function( req, res, next ) {
+    const reqData = {};
+    res.writeHead(200);
+    console.log(req.method);
+    console.log(req.headers);
+    console.log(req.url);
+    
+    var data = '';
+    req.on('data', function(chunk) {
+        data += chunk.toString();
+    });
+    req.on('end', function() {
+        console.log(data);
+        res.write('hi');
+        res.end();
+    });
+});
+
+// const multiparty = require('multiparty');
+// const needle = require('needle');
+// const fs = require('fs');
+// const URL = require('url');
+
+// app.post('/posts/authors/:aid', async (req, res) => {
+//     let author = dat.authors.find( element => element.ID == req.params.aid );
+//     console.log('author', author);
+//     res.render('new_post_form', {'author': author})
+// });
+
+
 const server = app.listen(process.env.PORT || config.port, () => {
     console.log(`Listening on: http://${server.address().address}:${server.address().port}`);
 });

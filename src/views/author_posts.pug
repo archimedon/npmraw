@@ -4,51 +4,6 @@ mixin listPosts(author, posts)
     if posts
       each art in posts
         li(id='authors/' + author.ID + '/posts/' + art.ID) #{art.post_title}
-    
-  <div class="list" id="post_block" style="display: none;height: 36em; text-align: center;">
-    <span class="list-title"><h3>Create Article</h3> Upload: .doc, header image</span>
-    <div id="post_block_form" style="display: inline-block; background-color: #727476; border-radius: 0.3rem; margin: auto; position: relative; border: 1px solid orange; width: 24em; height: 26em;"></div>
-  </div>
-  script.
-    $(function() {
-      var readyup = {
-        'doc': false,
-        'header': false,
-        'category': false
-      };
-      $('#post_block_form').dropzone({ // The camelized version of the ID of the form element
-        url: '/posts/authors/' + #{author.ID},
-        previewsContainer: ".dropzone-previews",
-        autoProcessQueue: false,
-        autoQueue: true,
-        uploadMultiple: true,
-        accept: function(file, done) {
-          if ((/\.docx*$/).test(file.name)) {
-            readyup.doc = true;
-            done();
-          }
-          else if ((/\.(?:tiff|jpg|png|gif)$/).test(file.name)) {
-            readyup.header = true;
-            done();
-          }
-          console.log('readyup', readyup);
-
-          if (readyup.header && readyup.doc) {
-            $('#categories').show();
-          }
-          console.log('file.name', file.name);
-        },
-        parallelUploads: 2,
-        addRemoveLinks: true,
-        maxFiles: 2
-      });
-      $('.new_post').click(function(e) {
-        var self = $(this);
-        console.log('self.attr("id")', self.attr("id"));
-        $('#post_block').show();
-        $('#previewzone').show();
-      });
-    });
 
 block content
 
