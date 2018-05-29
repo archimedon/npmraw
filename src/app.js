@@ -34,7 +34,9 @@ dat.posts.forEach(element => {
     if (! dat.author_posts[aid]) dat.author_posts[aid] = [];
     dat.author_posts[aid].push(element);
 });
-
+dat.categories.map(category => 
+    category.label = (category.parentName ?  '/<code>' + category.parentName + '</code>' : '') + '/<code>' + category.name + '</code>'
+);
 // request.get('http://localhost/wp-content/uploads/categories.json', function(error, response, body){
 //     if(error) console.log(error);
 //     dat.categories = JSON.parse(body);
@@ -78,7 +80,11 @@ app.get('/', async (req, res) => {
 // fs.createReadStream('index.html').pipe(res);
 
 
-app.get('/authors/:aid/posts', async (req, res) => {
+app.get('/author', async (req, res) => {
+    res.render('hyperlist', {'authors': dat.authors})
+});
+
+app.get('/author/:aid/post', async (req, res) => {
     let author = dat.authors.find( element => element.ID == req.params.aid );
     console.log('author', author);
     res.render('author_posts', {'author': author, 'posts': dat.author_posts[req.params.aid]})
@@ -108,14 +114,36 @@ var util = require('util');
 
 app.post( '/posts/authors/:aid', function( req, res, next ) {
     const reqData = {};
-    var form = new multiparty.Form();
-
-    form.parse(req, function(err, fields, files) {
-      res.writeHead(200, {'content-type': 'text/plain'});
-      res.write('received upload:\n\n');
-      res.end(util.inspect({fields: fields, files: files}));
+    var form = new multiparty.Form({
+        encoding: "utf8",
+        autoFields: true,        // Enables field events and disables part events for fields. This is automatically set to true if you add a field listener.
+        autoFiles: true          // Enables file events and disables part events for files. This is automatically set to true if you add a file listener.
     });
 
+    form.parse(req, (err, fields, files) => {
+        Object.keys(fields).forEach(function (name) {
+            console.log('got field named: ' + name);
+            console.log('got field value: ' + fields[name][0]);
+            reqData[name] = fields[name];
+        });
+        Object.keys(files).forEach(function (fileFieldKey) {
+            var file = files[fileFieldKey][0];
+            reqData[fileFieldKey] = {
+                // buffer: fs.readFileSync(file.path),
+                filename: file.originalFilename || file.headers['filename'],
+                content_type: file.headers['content-type']
+            }
+        })
+        console.log('reqData', JSON.stringify(reqData));
+
+    res.end(JSON.stringify(reqData));
+    });
+    
+            // console.log('fileFieldKey ' + fileFieldKey);
+            // console.log('fileFieldName ' + file.fieldName);
+            // console.log('originalFilename ' + file.originalFilename);
+            // console.log('path ' + file.path);
+            // console.log('file.headers ' + JSON.stringify(file.headers));
     // res.writeHead(200);
     // console.log(req.method);
     // console.log(req.headers);

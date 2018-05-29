@@ -1,160 +1,16 @@
 extends layout
 
-mixin listAuthors(authors)
-  ul(class="list-items authors_list")
-    each author in authors
-      - var aid = author.ID;
-      - var posts = author_posts[aid];
-      - var trgtprop = 'authors/' + aid;
-      
-      li(class='author select_link', id=trgtprop)
-        div
-          input(class="dz-hidden-input", type="radio", name="author_id", id='author_id_' + aid, value=aid)
-          label(for='author_id_' + aid) #{author.display_name}
+mixin list(collection, keyn, valn, checkbox)
+  ul(class='list-items hyper_list ' + collection.name + '_list')
+    each item in collection.list
+      - var itemId = item[keyn];
+      - var elemtId = collection.name + '/' + itemId;
+      - var inputtype = checkbox && typeof checkbox == 'string' ? checkbox : "radio"
+      - var inputnm = collection.nm ? collection.nm : (collection.name + '_id')
+      li(class=collection.name + '_item hyper_item', id='disp-' + elemtId)
+        input(class=collection.name + '_input hyper_input', type=inputtype, name=inputnm, id=elemtId, value=itemId)
+        label(for=elemtId) !{item[valn]}
 
-  script.
-    $(function() {
-      //- $( "#submit" ).on( "click", function(event) {
-      //-   console.log($("body").find("select,textarea, input").serialize());
-      //- });
-      $( "li.select_link label" ).on( "click", function(event) {
-        //- event.preventDefault();
-        //- event.stopImmediatePropagation();
-        event.stopPropagation();
-      });
-
-      $( ".list-items" ).on( "redraw", function(event) {
-        $(this).children("li.select_link").trigger('showstat');
-      });
-      
-      $( "li.select_link" ).on('showstat', function(event) {
-        var self = $(this);
-        $(this).find(':radio, :checkbox').each( function (i, input) {
-          self.toggleClass( "active", input.checked);
-        });
-      })
-      .on( "change", "input", function(event) {
-        $(this).closest('ul').trigger('redraw');
-      })
-      .on('click', function(event) {
-        // Only on non-input events, lest it'll unset the user choice
-        if ( ! $(this).hasClass( "active" )) {
-          //- $(this).find(':radio, :checkbox').each( function (i, input) {          
-          $(this).find(':radio').each( function (i, input) {
-            if (event.target.tagName.toUpperCase() != 'INPUT') {
-              input.checked = ! input.checked;
-            }
-            $(input).trigger('change');              
-          });
-        }
-      });
-
-      $('.author').click(function(event) {
-        var refId = $(this).attr("id");
-        if ($(this).hasClass( "active" ) && $('#author_posts').data("ref") != refId ) {
-          //- $('#dropzone-previews').empty().hide();
-          //- $('#author_posts').empty().hide();
-          $('#author_posts').data("ref", refId ).empty().show().load('/' + refId + '/posts');
-        }
-      });
-
-      function getOpts(uri) {
-        return {
-          url: uri,
-          previewsContainer: ".dropzone-previews",
-          autoProcessQueue: false,
-          autoQueue: true,
-          uploadMultiple: true,
-          parallelUploads: 4,
-          addRemoveLinks: true,
-          maxFiles: 4,
-          init: function() {
-            dzClosure = this; // closure
-            dzClosure._cdat = 0;
-
-            var submitButton = document.querySelector("#submit")
-            submitButton.addEventListener("click", function( event) {
-              event.preventDefault();
-              event.stopPropagation();
-              //- event.stopImmediatePropagation();
-              if (dzClosure.getQueuedFiles().length > 0) {
-                  dzClosure.processQueue();
-              } else {
-                  dzClosure.uploadFiles([{ name: 'nofiles' }]); //send empty
-              }
-            });
-
-            this.on("completemultiple", function (responseText) {
-                dzClosure.removeAllFiles();
-                $('#post_block').trigger('finish', dzClosure);
-                alert(responseText);
-            });
-
-            //send all the form data along with the files:
-            this.on("sendingmultiple", function (data, xhr, formData) {
-              console.log('sendingmultiple');
-              //- console.log('data', data);
-
-              var ary = $("body").find("select, textarea, input:checkbox, input:radio").serializeArray();
-              
-              $.each(ary, function (i, elem) {
-                formData.append(elem.name, elem.value); // Append all the additional input data of your form here!
-                console.log('nv', elem);
-              })
-            });
-            // You might want to show the submit button only when 
-            // files are dropped here:
-            this.on("addedfile", function(file) {
-              dzClosure._cdat += 1;
-              console.log('_cdat', dzClosure._cdat);
-              console.log('file', file);
-              if (dzClosure._cdat == 2) {
-                 $('#categories').show();
-              }
-              // Show submit button here and/or inform user to click it.
-            });
-
-            this.on("sending", function(file, xhr, formData) {
-              console.log('sending', formData);
-
-              //- var value = $('form#upload1 #key').val();
-              //- var ary = $("body").find("select, textarea, input:checkbox, input:radio").serializeArray();
-              //- console.log('ary', ary);
-
-              //- $.each(ary, function (i, elem) {
-              //-   formData.append(elem.name, elem.value); // Append all the additional input data of your form here!
-              //-   console.log('nv', elem);
-              //- })
-            });
-          }
-        };
-      }
-        var postBlockForm = new Dropzone("#post_block_form", getOpts('/posts/authors/12'));
-
-      //- $('#post_block_form').dropzone();
-
-      // The camelized version of the ID of the form element
-      //- Dropzone.postBlockForm.options = zoneOpts;
-      //- $('#post_block_form').dropzone(zoneOpts);
-      $('#author_posts').on('click', '.new_post', function(e) {
-        var self = $(this);
-        console.log('self.attr("id")', self.attr("id"));
-        postBlockForm.options.url = self.attr("id");
-        postBlockForm.enable();
-        $('#post_block').on('finish', function( event, data) {
-          data.disable()
-          $(this).hide();
-          $('#previewzone').hide();
-          $('#categories').hide();
-        });
-        $('#post_block').show();
-        $('#previewzone').show();
-
-        //- console.log('block', $('#post_block_form'))
-        //- console.log($('#post_block_form').dropzone)
-      });
-      
-    });
 
 block content
   h1=Publisher
@@ -177,27 +33,22 @@ block content
 
     <div class="list">
       <h3 class="list-title">Authors</h3>
-      +listAuthors(authors)
+      +list({'list': authors, 'name': 'author'} , 'ID', 'display_name', "radio")
     </div>
 
     <div class="list" style="display: none;" id="author_posts">author_posts</div>
     
     <div class="list" id="post_block" style="display: none; height: 36em; text-align: center;">
       <span class="list-title"><h3>Create Article</h3> Upload: Article (*.docx) &amp; header image (*.gif|jpg|png|tiff)</span>
-      <form id="post_block_form" class="zone_form dropzone-previews" method="post" enctype="multipart/form-data"></form>
+      <div action="/upload/stub" id="post_block_form" class="add-list zone_form dropzone-previews" style="height: 24rem; width: 24rem; text-align: center;"></div>
     </div>
 
     <div class="list" id="categories" style="display: none;">
       <h3 class="list-title">Categories</h3>
-      ul(class="list-items")
-        each category in categories
-          li(class='category select_link')
-            div
-              input(class="dz-hidden-input", type="checkbox", id='category/' + category.term_id, name="category", value=category.term_id)
-              label(for='category/' + category.term_id) /#{category.parentName}/#{category.name}
+      +list({'list': categories, 'name': 'category'} , 'term_id', 'label', "checkbox")
     </div>
    
-    <div class="add-list" id="submit">Submit Article</div>
+    <div class="add-list" id="submit" style="height: 4rem; width: 14rem; text-align: center; display: none !important;">Submit Article</div>
   </section>
   <!-- End of lists container -->
 

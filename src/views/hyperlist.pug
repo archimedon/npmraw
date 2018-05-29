@@ -1,0 +1,61 @@
+extends layout
+
+mixin list(collection, keyn, valn, checkbox)
+  ul(class='list-items hyper_list ' + collection.name + '_list')
+    each item in collection.list
+      - var itemId = item[keyn];
+      - var elemtId = collection.name + '/' + itemId;
+      - var inputtype = checkbox && typeof checkbox == 'string' ? checkbox : "radio"
+      - var inputnm = collection.nm ? collection.nm : (collection.name + '_id')
+      li(class=collection.name + '_item hyper_item', id='disp-' + elemtId)
+        input(class=collection.name + '_input hyper_input', type=inputtype, name=inputnm, id=elemtId, value=itemId)
+        label(for=elemtId) #{item[valn]}
+
+  script.
+    $(function() {
+      $('.hyper_list').on('change', function (e) {
+        if (e.target.classList.contains('hyper_input')) {
+          this.querySelectorAll(".hyper_input").forEach( function (curr, index) {
+            $(curr).trigger('show');
+          })
+        }
+      })
+      $('.hyper_list').on('click', function (e) {
+        if (e.target.classList.contains('hyper_item')) {
+          e.target.querySelector(".hyper_input").click();
+        }
+      })
+      $('.hyper_input').on('show', function (e) {
+        $(this).closest('.hyper_item').trigger('redraw', { state: this.checked })
+      })
+      $('.hyper_item').on('redraw', function (e, data) {
+         this.classList.toggle("active", data.state)
+      })
+      // Add 
+      $('.author_item').on('change', function (e) {
+        var loadZone =  $('#author_posts');
+        var currUrn = loadZone.data("ref");
+        var targetUrn = e.target.id
+
+        if (e.target.checked) {
+        console.info("e.target.id: ", e.target.id);
+          loadZone.data("ref", targetUrn ).empty().show().load('/' + targetUrn + '/post');
+        }
+        else if (currUrn == targetUrn) {
+        console.info("target: ", e.target);
+          loadZone.empty().removeData("ref");
+        }
+      })
+      
+    });
+
+block content
+  <section class="lists-container">
+    <div class="list">
+      <h3 class="list-title">Authors</h3>
+      +list({'list': authors, 'name': 'author'} , 'ID', 'display_name', "checkbox")
+    </div>
+    <div class="list">
+    <div id="author_posts">author_posts</div>
+
+  </section>
