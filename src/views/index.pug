@@ -39,7 +39,7 @@ block content
     
     <div class="list" id="post_block" style="display: none; height: 36em; text-align: center;">
       <span class="list-title"><h3>Create Article</h3> Upload: Article (*.docx) &amp; header image (*.gif|jpg|png|tiff)</span>
-      <div action="/upload/stub" id="post_block_form" class="add-list zone_form dropzone-previews" style="height: 24rem; width: 24rem; text-align: center;"></div>
+      <div action="/upload/stub" id="post_block_form" class="upload_rel zone_form"></div>
     </div>
 
     <div class="list" id="categories" style="display: none;">
@@ -47,6 +47,6 @@ block content
       +list({'list': categories, 'name': 'category'} , 'term_id', 'label', "checkbox")
     </div>
    
-    <div class="add-list" id="submit" style="height: 4rem; width: 14rem; text-align: center; display: none !important;">Submit Article</div>
+    <div class="upload_rel" id="submit" style="display: none;">Submit Article</div>
   </section>
   <!-- End of lists container -->

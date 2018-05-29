@@ -1,9 +1,9 @@
 mixin listPosts(author, posts)
   ul(class="posts list-items")
-    li(class="new_post add-card", id='/posts/authors/' + author.ID) Add an Article... 
+    li(class="upload_rel new_post", id='/post/author/' + author.ID) Create Article... 
     if posts
       each art in posts
-        li(id='authors/' + author.ID + '/posts/' + art.ID) #{art.post_title}
+        li(id='post/' + art.ID + '/author/' + author.ID) #{art.post_title}
 
 block content
 

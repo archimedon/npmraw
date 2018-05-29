@@ -59,7 +59,7 @@ $(function() {
     function getOpts() {
       return {
         url: null,
-        previewsContainer: ".dropzone-previews",
+        previewsContainer: "#post_block_form",
         autoProcessQueue: false,
         autoQueue: true,
         uploadMultiple: true,
